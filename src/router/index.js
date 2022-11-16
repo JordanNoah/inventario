@@ -8,52 +8,62 @@ import Products from '../views/main/Products'
 import Home from '../views/main/Home'
 import InternalProducts from '../views/main/InternalProducts'
 import NotFound from '../views/outside/NotFound'
-
+import Brands from '../views/main/Brands'
 
 Vue.use(VueRouter)
 
 const routes = [{
+  path:'/',
+  redirect:{
+    name:'Home'
+  }
+},{
     path: '/login',
     name: 'Login',
     component: Login
-  },{
+  }, {
     path: '*',
     name: 'NotFound',
     component: NotFound
-  }
-,
-
+  },
   {
     path: '/main',
     name: 'Main',
     component: Main,
-    redirect:{name:'Home'},
+    redirect: {
+      name: 'Home'
+    },
     children: [{
-      path: 'home' ,
-      name: 'Home',
-      component:Home
-    },
-    {
-      path: 'posts' ,
-      name: 'Posts',
-      component:Posts
-    },
-    {
-      path: 'products' ,
-      name: 'Products',
-      component:Products
-    },
-    {
-      path: 'branchOffice' ,
-      name: 'BranchOffice',
-      component:BranchOffice
-    },
-    {
-      path: 'internalProducts' ,
-      name: 'InternalProducts',
-      component:InternalProducts
-    }
-  ]
+        path: 'home',
+        name: 'Home',
+        component: Home
+      },
+      {
+        path: 'posts',
+        name: 'Posts',
+        component: Posts
+      },
+      {
+        path: 'products',
+        name: 'Products',
+        component: Products
+      },
+      {
+        path: 'branchOffice',
+        name: 'BranchOffice',
+        component: BranchOffice
+      },
+      {
+        path: 'internalProducts',
+        name: 'InternalProducts',
+        component: InternalProducts
+      },
+      {
+        path: 'brands',
+        name: 'Brands',
+        component: Brands
+      }
+    ]
 
   },
 
