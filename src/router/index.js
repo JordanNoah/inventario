@@ -7,6 +7,7 @@ import Posts from '../views/main/Posts'
 import Products from '../views/main/Products'
 import Home from '../views/main/Home'
 import InternalProducts from '../views/main/InternalProducts'
+import NotFound from '../views/outside/NotFound'
 
 
 Vue.use(VueRouter)
@@ -15,12 +16,18 @@ const routes = [{
     path: '/login',
     name: 'Login',
     component: Login
-  },
+  },{
+    path: '*',
+    name: 'NotFound',
+    component: NotFound
+  }
+,
 
   {
     path: '/main',
     name: 'Main',
     component: Main,
+    redirect:{name:'Home'},
     children: [{
       path: 'home' ,
       name: 'Home',

@@ -1,6 +1,11 @@
 <template>
     <v-container fuild fill-height>
-     <v-app-bar dense flat app clipped-left>
+     <v-app-bar dense flat app >
+        <v-btn icon @click="openNavigation()">
+            <v-icon small>
+                fa-solid fa-bars
+            </v-icon>
+        </v-btn>
             <v-spacer></v-spacer>
             <v-menu v-model="menu" :close-on-content-click="false" :nudge-width="200" offset-x>
                 <template v-slot:activator="{ on, attrs }">
@@ -10,7 +15,23 @@
                 </template>
 
                 <v-card>
-                    <v-list>
+                    <v-list >
+                        <v-list-item link @click="changeTheme()">
+                            <v-list-item-avatar>
+                                <v-avatar >
+                                    <v-icon v-if="$vuetify.theme.isDark" > fa-solid fa-moon</v-icon>
+                                    <v-icon v-else>fa-regular fa-sun</v-icon>
+                                </v-avatar>
+                            </v-list-item-avatar>
+                            <v-list-item-content >
+                                <v-list-item-title v-if="$vuetify.theme.isDark" >
+                                    darkmode
+                                </v-list-item-title>
+                                <v-list-item-title v-else>
+                                    lightmode
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
                         <v-list-item>
                             <v-btn text block @click="closeSession">Cerrar sesion</v-btn>
                         </v-list-item>
@@ -19,11 +40,11 @@
             </v-menu>
 
         </v-app-bar>
-        <v-navigation-drawer permanet app clipped>
+        <v-navigation-drawer permanet app :mini-variant="openNavigationDrawer"  :expand-on-hover="openNavigationDrawer" >
             <v-list >
                 
-                <v-list-item-group v-model="selectedItem" color="primary">
-                    <v-list-item v-for="(item, i) in items" :key="i" @click="$router.push({name:item.path})">
+                <v-list-item-group  color="primary">
+                    <v-list-item v-for="(item, i) in items" :key="i" :to="item.path">
                         <v-list-item-icon>
                             <v-icon v-text="item.icon"></v-icon>
                         </v-list-item-icon>
@@ -47,13 +68,14 @@
     export default {
         data: () => ({
             menu: false,
-            selectedItem: 1,
+            
       items: [
-        { text: 'Home', icon: 'fas fa-home' ,path: 'Home' },
-        { text: 'Posts', icon: 'fa-shopping-cart', path:'Posts' },
-        { text: 'Branch offices', icon: 'fas fa-city', path:'BranchOffice' },
-        {text: 'Products', icon: 'fab fa-product-hunt', path:'Products'},
-        {text:'InternalProducts', icon:'fab fa-sketch', path:'InternalProducts'} ]
+        { text: 'Home', icon: 'fas fa-home' ,path: '/main/home' },
+        { text: 'Posts', icon: 'fa-shopping-cart', path:'/main/posts' },
+        { text: 'Branch offices', icon: 'fas fa-city', path:'/main/branchOffice' },
+        {text: 'Products', icon: 'fab fa-product-hunt', path:'/main/products'},
+        {text:'InternalProducts', icon:'fab fa-sketch', path:'/main/internalProducts'} ],
+        openNavigationDrawer:false
         }),
         methods: {
             closeSession() {
@@ -61,7 +83,13 @@
                 this.$router.push({
                     name: 'Login'
                 })
+            },changeTheme(){
+               this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
+            },
+            openNavigation(){
+            this.openNavigationDrawer= !this.openNavigationDrawer
             }
+
         }
     }
 </script>
