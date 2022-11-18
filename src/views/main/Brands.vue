@@ -9,7 +9,7 @@
                                 <v-text-field outlined dense clearable hide-details></v-text-field>
                             </v-col>
                             <v-col cols="3" class="d-flex justify-end">
-                                <v-btn>
+                                <v-btn @click="dialog=true">
                                     <v-icon small class="pr-2">
                                         fas fa-plus
                                     </v-icon>
@@ -18,7 +18,7 @@
                             </v-col>
                         </v-row>
                     </v-card-title>
-                    <v-data-table :headers="headers" :items="brands" class="elevation-0 mt-3" :search="search">
+                    <v-data-table :headers="headers" :items="brands" class="elevation-0 mt-3" :search="search" >
                         <template v-slot:top>
                             <v-dialog v-model="dialogDelete" max-width="500px">
                                 <v-card>
@@ -33,9 +33,10 @@
                                 </v-card>
                             </v-dialog>
                         </template>
-                        <template v-slot:[`item.avatar`]="{ item }">
+                        <template v-slot:[`item.image`]="{ item }">
+                           
                             <v-avatar height="40" min-width="40" width="40">
-                                <v-img :src="item.avatar"></v-img>
+                             <v-img :src="'http://192.168.100.30:3000/'+item.image"></v-img>
                             </v-avatar>
                         </template>
                         <template v-slot:[`item.actions`]="{ item }">
@@ -132,7 +133,7 @@ export default {
         headers:[
             {
                 text:'Avatar',
-                value:'avatar',
+                value:'image',
                 sortable:false
             },
             {
@@ -158,15 +159,8 @@ export default {
             }
         ],
         brands:[
-            {
-                avatar:'https://www.ret.ec/wp-content/uploads/2022/05/Nestle.png',
-                uuid:'331fa95a-6298-439f-b9ee-c161f2cd4d45',
-                name:'Nestle',
-                createdAt:new Date().toTimeString(),
-                updatedAt:new Date().toTimeString()
-            }
         ],
-        dialog:true
+        dialog:false
     }),
     methods:{
         closeDelete(){
@@ -182,12 +176,27 @@ export default {
         },
         async saveBrand(){
             let formData = new FormData()
-            formData.append("file",this.uploadImage.files.item(0))
+            console.log(this.uploadImage);
+            formData.append("file",this.uploadImage==null ?null: this.uploadImage.files.item(0))
+            
             formData.append("nameBrand",this.brandName)
 
-            var response = await axios.post('http://192.168.100.10:3000/brand/save', formData,{headers: {"Content-Type": "multipart/form-data"}})
+            var response = await axios.post('http://192.168.100.30:3000/brand/save', formData,{headers: {"Content-Type": "multipart/form-data"}})
+            this.brands.push (response.data)
+            this.dialog= false
             console.log(response);
+        },
+        initialize(){
+            this.getAll()
+        },
+       async getAll(){
+var getall = await axios.get('http://192.168.100.30:3000/brand/all')
+    this.brands = getall.data
         }
+    }
+    ,
+    mounted: async function(){
+    this.getAll()
     }
 }
 </script>
