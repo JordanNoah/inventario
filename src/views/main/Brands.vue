@@ -56,53 +56,79 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-dialog v-model="dialog" width="800" class="rounded-xl">
+        <v-dialog v-model="dialog" width="500" class="rounded-xl">
             <v-card elevation="0">
                 <v-container>
-                    <v-row no-gutters >
+                    <v-row no-gutters>
                         <v-col cols="6">
-                            <v-card height="400" elevation="0" class="d-flex align-center elevation-0">
-                                <v-img src="https://www.ret.ec/wp-content/uploads/2022/05/Nestle.png"></v-img>
+                            <v-card height="250" elevation="0" class="d-flex align-center elevation-0" v-if="uploadImage">
+                                <v-img src="https://www.ret.ec/wp-content/uploads/2022/05/Nestle.png" v-if="!uploadImage"></v-img>
+                                <v-img :src="previewImage" v-else></v-img>
+                            </v-card>
+                            <v-card height="250" outlined @click="uplodadImage" v-else>
+                                <v-container fill-height>
+                                    <v-row align="center" justify="center">
+                                        <v-col cols="12" class="d-flex justify-center">
+                                            <v-icon>
+                                                fas fa-cloud-upload-alt
+                                            </v-icon>
+                                        </v-col>
+                                        <v-col cols="12" class="d-flex justify-center">
+                                            <span>
+                                                Upload image
+                                            </span>
+                                        </v-col>
+                                        <input type="file" accept="image/*" ref="imageUpload" @change="imagetoupload" style="display:none;">
+                                    </v-row>
+                                </v-container>
                             </v-card>
                         </v-col>
                         <v-col cols="6">
                             <v-container fill-height class="d-flex align-start">
-                                <v-row no-gutters style="height:inherit!important;" >
-                                    <v-col cols="12">
-                                        <v-card-title>
-                                            New Brand
-                                        </v-card-title>
-                                    </v-col>
+                                <v-row no-gutters style="height:inherit!important;">
                                     <v-col cols="12" class="d-flex align-center">
                                         <div class="mx-2">
                                             <v-row>
+                                                <v-card-title>
+                                                    New Brand
+                                                </v-card-title>
                                                 <v-col cols="12" class="d-flex align-center">
-                                                    <v-text-field outlined dense hide-details="auto"></v-text-field>
+                                                    <v-text-field outlined dense hide-details="auto" label="Brand name" v-model="brandName"></v-text-field>
                                                 </v-col>
                                             </v-row>
                                         </div>
-                                    </v-col>
-                                    <v-col cols="12" class="d-flex justify-end align-end">
-                                        <v-btn text class="mx-1" color="error">
-                                            Close
-                                        </v-btn>
-                                        <v-btn text color="success">
-                                            Save
-                                        </v-btn>
                                     </v-col>
                                 </v-row>
                             </v-container>
                         </v-col>
                     </v-row>
                 </v-container>
+                <v-card-actions>
+                    <v-container>
+                        <v-row justify="end">
+                            <v-btn text class="mx-1" color="error">
+                                Close
+                            </v-btn>
+                            <v-btn text color="success" @click="saveBrand()">
+                                Save
+                            </v-btn>
+                        </v-row>
+                    </v-container>
+                </v-card-actions>
             </v-card>
         </v-dialog>
     </v-container>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     data:()=>({
+        search:null,
+        dialogDelete:false,
+        uploadImage:null,
+        previewImage:null,
+        brandName:null,
         headers:[
             {
                 text:'Avatar',
@@ -141,6 +167,27 @@ export default {
             }
         ],
         dialog:true
-    })
+    }),
+    methods:{
+        closeDelete(){
+            this.dialogDelete = false
+        },
+        deleteItemConfirm(){},
+        uplodadImage(){
+            this.$refs.imageUpload.click();
+        },
+        imagetoupload(){
+            this.uploadImage = this.$refs.imageUpload
+            this.previewImage = URL.createObjectURL(this.uploadImage.files.item(0))
+        },
+        async saveBrand(){
+            let formData = new FormData()
+            formData.append("file",this.uploadImage.files.item(0))
+            formData.append("nameBrand",this.brandName)
+
+            var response = await axios.post('http://192.168.100.10:3000/brand/save', formData,{headers: {"Content-Type": "multipart/form-data"}})
+            console.log(response);
+        }
+    }
 }
 </script>

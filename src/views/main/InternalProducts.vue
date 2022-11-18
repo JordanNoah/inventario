@@ -156,7 +156,7 @@
 
     methods: {
       async initialize() {
-        var getall = await axios.get('http://192.168.100.30:3000/product/all')
+        var getall = await axios.get('http://192.168.100.130:3000/product/all')
         console.log(getall);
         this.desserts = getall.data //
       },
@@ -174,7 +174,7 @@
       },
 
       async deleteItemConfirm() {
-        var del = await axios.delete(`http://192.168.100.30:3000/product/uuid/${this.editedItem.uuid}`)
+        var del = await axios.delete(`http://192.168.100.130:3000/product/uuid/${this.editedItem.uuid}`)
         if (del.data.delete) {
           this.desserts.splice(this.editedIndex, 1)
           console.log(del);
@@ -203,11 +203,11 @@
 
         if (this.$refs.form.validate()) {
           if (this.editedIndex == -1) {
-            var save = await axios.post('http://192.168.100.30:3000/product/save', this.editedItem)
+            var save = await axios.post('http://192.168.100.130:3000/product/save', this.editedItem)
             this.desserts.push(save.data)
             this.close()
           } else {
-            var update = await axios.put(`http://192.168.100.30:3000/product/uuid/${this.editedItem.uuid}`, this
+            var update = await axios.put(`http://192.168.100.130:3000/product/uuid/${this.editedItem.uuid}`, this
               .editedItem)
             if (update.data.update) {
               this.desserts.splice(this.editedIndex, 1, this.editedItem)
