@@ -6,8 +6,11 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@fortawesome/fontawesome-free/css/all.css'
+import provider from './plugins/provider'
 
 Vue.config.productionTip = false
+Vue.prototype.$provider=provider
+
 
 new Vue({
   router,

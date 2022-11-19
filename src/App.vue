@@ -13,6 +13,7 @@ export default {
     //
   }),
   created:function(){
+     console.log(process.env);
     this.$vuetify.theme.dark= true
   }
 };

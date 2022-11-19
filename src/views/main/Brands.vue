@@ -62,9 +62,25 @@
                 <v-container>
                     <v-row no-gutters>
                         <v-col cols="6">
-                            <v-card height="250" elevation="0" class="d-flex align-center elevation-0" v-if="uploadImage">
-                                <v-img src="https://www.ret.ec/wp-content/uploads/2022/05/Nestle.png" v-if="!uploadImage"></v-img>
-                                <v-img :src="previewImage" v-else></v-img>
+                            <v-card height="250" elevation="0" class="d-flex align-center elevation-0" v-if="editedItem.image">
+                                <v-img src="https://www.ret.ec/wp-content/uploads/2022/05/Nestle.png" v-if="!editedItem.image"></v-img>
+                                <v-hover  v-else v-slot="{ hover }">
+                                    <v-img :src="$store.state.baseUrl+'/'+editedItem.image">
+                                    <v-expand-transition>
+          <div
+            v-if="hover"
+            class="d-flex transition-fast-in-fast-out  darken-2 v-card--reveal text-h2 white--text"
+           
+          >
+            <v-row no-gutters align="end ">
+                <v-col cols="6"> <v-btn block @click="uplodadImage()"><v-icon>fas fa-redo-alt</v-icon> </v-btn></v-col>
+                <v-col cols="6"> <v-btn block> <v-icon>fas fa-backspace</v-icon> </v-btn> </v-col>    
+            </v-row>
+          </div>
+        </v-expand-transition>
+                                    </v-img>
+                                    
+                                </v-hover>
                             </v-card>
                             <v-card height="250" outlined @click="uplodadImage" v-else>
                                 <v-container fill-height>
@@ -79,10 +95,11 @@
                                                 Upload image
                                             </span>
                                         </v-col>
-                                        <input type="file" accept="image/*" ref="imageUpload" @change="imagetoupload" style="display:none;">
+                                        
                                     </v-row>
                                 </v-container>
                             </v-card>
+                            <input type="file" accept="image/*" ref="imageUpload" @change="imagetoupload" style="display:none;">
                         </v-col>
                         <v-col cols="6">
                             <v-container fill-height class="d-flex align-start">
@@ -94,7 +111,7 @@
                                                     New Brand
                                                 </v-card-title>
                                                 <v-col cols="12" class="d-flex align-center">
-                                                    <v-text-field outlined dense hide-details="auto" label="Brand name" v-model="brandName"></v-text-field>
+                                                    <v-text-field outlined dense hide-details="auto" label="Brand name" v-model="editedItem.name"></v-text-field>
                                                 </v-col>
                                             </v-row>
                                         </div>
@@ -122,10 +139,15 @@
 </template>
 
 <script>
-import axios from 'axios'
 export default {
     data:()=>({
         search:null,
+        editedIndex: -1,
+        editedItem:{
+            name:'',
+            uuid:'',
+            image:null
+        },
         dialogDelete:false,
         uploadImage:null,
         previewImage:null,
@@ -172,16 +194,13 @@ export default {
         },
         imagetoupload(){
             this.uploadImage = this.$refs.imageUpload
-            this.previewImage = URL.createObjectURL(this.uploadImage.files.item(0))
+            this.editedItem.image = URL.createObjectURL(this.uploadImage.files.item(0))
         },
         async saveBrand(){
             let formData = new FormData()
-            console.log(this.uploadImage);
             formData.append("file",this.uploadImage==null ?null: this.uploadImage.files.item(0))
-            
-            formData.append("nameBrand",this.brandName)
-
-            var response = await axios.post('http://192.168.100.30:3000/brand/save', formData,{headers: {"Content-Type": "multipart/form-data"}})
+            formData.append("nameBrand",this.editedItem.name)
+            var response = await this.$provider.saveBrand(formData)
             this.brands.push (response.data)
             this.dialog= false
             console.log(response);
@@ -190,8 +209,13 @@ export default {
             this.getAll()
         },
        async getAll(){
-var getall = await axios.get('http://192.168.100.30:3000/brand/all')
+var getall = await this.$provider.getBrandsAll()
     this.brands = getall.data
+        },
+        editItem(item){
+            this.editedIndex = this.brands.indexOf(item)
+            this.editedItem =Object.assign({},item)
+            this.dialog = true
         }
     }
     ,
@@ -200,3 +224,13 @@ var getall = await axios.get('http://192.168.100.30:3000/brand/all')
     }
 }
 </script>
+
+<style>
+.v-card--reveal {
+  align-items: center;
+  bottom: 0;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+}
+</style>
