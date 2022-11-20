@@ -18,7 +18,7 @@
                             </v-col>
                         </v-row>
                     </v-card-title>
-                    <v-data-table :headers="headers" :items="brands" class="elevation-0 mt-3" :search="search" >
+                    <v-data-table :headers="headers" :items="brands" class="elevation-0 mt-3" :search="search">
                         <template v-slot:top>
                             <v-dialog v-model="dialogDelete" max-width="500px">
                                 <v-card>
@@ -34,9 +34,9 @@
                             </v-dialog>
                         </template>
                         <template v-slot:[`item.image`]="{ item }">
-                           
+
                             <v-avatar height="40" min-width="40" width="40">
-                             <v-img :src="'http://192.168.100.30:3000/'+item.image"></v-img>
+                                <v-img :src="`${$store.state.baseUrl}/${item.image}`"></v-img>
                             </v-avatar>
                         </template>
                         <template v-slot:[`item.actions`]="{ item }">
@@ -57,49 +57,65 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-dialog v-model="dialog" width="500" class="rounded-xl">
+        <v-dialog v-model="dialog" width="500" class="rounded-xl" @click:outside="close()">
             <v-card elevation="0">
                 <v-container>
                     <v-row no-gutters>
                         <v-col cols="6">
-                            <v-card height="250" elevation="0" class="d-flex align-center elevation-0" v-if="editedItem.image">
-                                <v-img src="https://www.ret.ec/wp-content/uploads/2022/05/Nestle.png" v-if="!editedItem.image"></v-img>
-                                <v-hover  v-else v-slot="{ hover }">
-                                    <v-img :src="$store.state.baseUrl+'/'+editedItem.image">
-                                    <v-expand-transition>
-          <div
-            v-if="hover"
-            class="d-flex transition-fast-in-fast-out  darken-2 v-card--reveal text-h2 white--text"
-           
-          >
-            <v-row no-gutters align="end ">
-                <v-col cols="6"> <v-btn block @click="uplodadImage()"><v-icon>fas fa-redo-alt</v-icon> </v-btn></v-col>
-                <v-col cols="6"> <v-btn block> <v-icon>fas fa-backspace</v-icon> </v-btn> </v-col>    
-            </v-row>
-          </div>
-        </v-expand-transition>
-                                    </v-img>
-                                    
+
+
+                            <v-card class="d-flex align-center justify-center" elevation="0">
+                                <v-hover v-if="editedItem.image.file || editedItem.image.url" v-slot="{ hover }">
+                                    <v-card height="200" width="200" outlined>
+                                        <v-img :src="editedItem.image.url" contain aspect-ratio="1"
+                                            v-if="editedItem.image.file"></v-img>
+                                        <v-img :src="`${$store.state.baseUrl}/${editedItem.image.url}`" contain
+                                            aspect-ratio="1" v-else></v-img>
+
+                                        <v-expand-transition>
+                                            <div v-if="hover"
+                                                class="d-flex transition-fast-in-fast-out black darken-2 v-card--reveal text-h2 white--text">
+                                                <v-row no-gutters>
+                                                    <v-col>
+                                                        <v-btn block depressed tile @click="openFileSystem()">
+                                                            <v-icon>
+                                                                fas fa-image
+                                                            </v-icon>
+                                                        </v-btn>
+                                                    </v-col>
+                                                    <v-col>
+                                                        <v-btn block depressed tile @click="setDefaultImage()">
+                                                            <v-icon>
+                                                                fas fa-times-circle
+                                                            </v-icon>
+                                                        </v-btn>
+                                                    </v-col>
+                                                </v-row>
+                                            </div>
+                                        </v-expand-transition>
+
+                                    </v-card>
                                 </v-hover>
+                                <v-card height="200" width="200" outlined v-else @click="openFileSystem()">
+                                    <v-container fill-height>
+                                        <v-row align="center" justify="center">
+                                            <v-col cols="12" class="d-flex justify-center">
+                                                <v-icon>
+                                                    fas fa-cloud-upload-alt
+                                                </v-icon>
+                                            </v-col>
+                                            <v-col cols="12" class="d-flex justify-center">
+                                                <span>
+                                                    Upload image
+                                                </span>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
+                                </v-card>
+                                <v-file-input accept="image/*" style="display:none" v-model="editedItem.image.file" ref="fileSystem"></v-file-input>
                             </v-card>
-                            <v-card height="250" outlined @click="uplodadImage" v-else>
-                                <v-container fill-height>
-                                    <v-row align="center" justify="center">
-                                        <v-col cols="12" class="d-flex justify-center">
-                                            <v-icon>
-                                                fas fa-cloud-upload-alt
-                                            </v-icon>
-                                        </v-col>
-                                        <v-col cols="12" class="d-flex justify-center">
-                                            <span>
-                                                Upload image
-                                            </span>
-                                        </v-col>
-                                        
-                                    </v-row>
-                                </v-container>
-                            </v-card>
-                            <input type="file" accept="image/*" ref="imageUpload" @change="imagetoupload" style="display:none;">
+
+
                         </v-col>
                         <v-col cols="6">
                             <v-container fill-height class="d-flex align-start">
@@ -111,7 +127,8 @@
                                                     New Brand
                                                 </v-card-title>
                                                 <v-col cols="12" class="d-flex align-center">
-                                                    <v-text-field outlined dense hide-details="auto" label="Brand name" v-model="editedItem.name"></v-text-field>
+                                                    <v-text-field outlined dense hide-details="auto" label="Brand name"
+                                                        v-model="editedItem.name"></v-text-field>
                                                 </v-col>
                                             </v-row>
                                         </div>
@@ -124,7 +141,7 @@
                 <v-card-actions>
                     <v-container>
                         <v-row justify="end">
-                            <v-btn text class="mx-1" color="error">
+                            <v-btn text class="mx-1" color="error" @click="close()">
                                 Close
                             </v-btn>
                             <v-btn text color="success" @click="saveBrand()">
@@ -140,87 +157,137 @@
 
 <script>
 export default {
-    data:()=>({
-        search:null,
+    data: () => ({
+        search: null,
         editedIndex: -1,
-        editedItem:{
-            name:'',
-            uuid:'',
-            image:null
+        editedItem: {
+            name: null,
+            uuid: null,
+            image: {
+                file: null,
+                url: null
+            }
         },
-        dialogDelete:false,
-        uploadImage:null,
-        previewImage:null,
-        brandName:null,
-        headers:[
-            {
-                text:'Avatar',
-                value:'image',
-                sortable:false
+        defaultItem: {
+            name: null,
+            uuid: null,
+            image: {
+                file: null,
+                url: null
+            }
+        },
+        dialogDelete: false,
+        uploadImage: null,
+        previewImage: null,
+        brandName: null,
+        headers: [{
+                text: 'Avatar',
+                value: 'image',
+                sortable: false
             },
             {
-                text:'Uuid',
-                value:'uuid'
+                text: 'Uuid',
+                value: 'uuid'
             },
             {
-                text:'Name',
-                value:'name'
+                text: 'Name',
+                value: 'name'
             },
             {
-                text:'Created At',
-                value:'createdAt'
+                text: 'Created At',
+                value: 'createdAt'
             },
             {
-                text:'Updated At',
-                value:'updatedAt'
+                text: 'Updated At',
+                value: 'updatedAt'
             },
             {
-                text:'Actions',
-                value:'actions',
-                sortable:false
+                text: 'Actions',
+                value: 'actions',
+                sortable: false
             }
         ],
-        brands:[
-        ],
-        dialog:false
+        brands: [],
+        dialog: true
     }),
-    methods:{
-        closeDelete(){
+    methods: {
+        returnPreview() {
+            if (!this.uploadImage) {
+                return `${this.$store.state.baseUrl}/${this.editedItem.image}`
+            } else {
+                return this.editedItem.image
+            }
+        },
+        closeDelete() {
             this.dialogDelete = false
         },
-        deleteItemConfirm(){},
-        uplodadImage(){
-            this.$refs.imageUpload.click();
+        deleteItemConfirm() {},
+        openFileSystem() {
+            this.$refs.fileSystem.$el.lastChild.firstChild.firstChild.lastChild.click()
         },
-        imagetoupload(){
-            this.uploadImage = this.$refs.imageUpload
-            this.editedItem.image = URL.createObjectURL(this.uploadImage.files.item(0))
-        },
-        async saveBrand(){
+        async saveBrand() {
             let formData = new FormData()
-            formData.append("file",this.uploadImage==null ?null: this.uploadImage.files.item(0))
-            formData.append("nameBrand",this.editedItem.name)
-            var response = await this.$provider.saveBrand(formData)
-            this.brands.push (response.data)
-            this.dialog= false
-            console.log(response);
+
+            if (this.editedItem.image.file) {
+                formData.append("file", this.editedItem.image.file)
+            } else {
+                if (!this.editedItem.image.url) {
+                    formData.append("file", null)
+                } else {
+                    formData.append("file", this.editedItem.image.url)
+                }
+            }
+
+            formData.append("nameBrand", this.editedItem.name)
+
+            if (!this.editedItem.uuid) {
+                let response = await this.$provider.saveBrandPost(formData)
+                console.error(response);
+            } else {
+                let response = await this.$provider.saveBrandPut(this.editedItem.uuid, formData)
+                console.log(response);
+            }
+
+            //this.brands.push(response.data)
+            this.close()
         },
-        initialize(){
+        initialize() {
             this.getAll()
         },
-       async getAll(){
-var getall = await this.$provider.getBrandsAll()
-    this.brands = getall.data
+        close() {
+            this.dialog = false
+            this.uploadImage = null
+            this.editedItem.name = null
+            this.editedItem.image.url = null
+            this.editedItem.image.file = null
+            this.editedItem.uuid = null
+            this.editedIndex = -1
         },
-        editItem(item){
+        async getAll() {
+            var getall = await this.$provider.getBrandsAll()
+            this.brands = getall.data
+        },
+        setDefaultImage() {
+            this.editedItem.image.file = null
+            this.editedItem.image.url = null
+        },
+        editItem(item) {
             this.editedIndex = this.brands.indexOf(item)
-            this.editedItem =Object.assign({},item)
+            this.editedItem.name = this.brands[this.editedIndex].name
+            this.editedItem.image.url = this.brands[this.editedIndex].image
+            this.editedItem.uuid = this.brands[this.editedIndex].uuid
             this.dialog = true
         }
-    }
-    ,
-    mounted: async function(){
-    this.getAll()
+    },
+    mounted: async function () {
+        this.getAll()
+    },
+    watch:{
+        'editedItem.image.file'(newVal){
+            if(newVal){
+                this.editedItem.image.url = URL.createObjectURL(newVal)
+            }
+        }
     }
 }
 </script>

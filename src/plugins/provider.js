@@ -6,9 +6,15 @@ const provider = {
  getBrandsAll: async() =>  {
      return await axios.get('/brand/all')
  },
- saveBrand: async(formData) =>{
+ saveBrandPost: async(formData) =>{
     return await axios.post('/brand/save', formData,{headers: {"Content-Type": "multipart/form-data"}})
  },
+ saveBrandPut: async(uuid,formData) => {
+   return await axios.put(`/brand/uuid/${uuid}`,formData)
+ },
+
+//
+
  getProductsAll: async() => {
     return await axios.get('/product/all')
  },
@@ -20,9 +26,6 @@ const provider = {
  },
  deleteProducts: async(uuid) => {
     return await axios.delete(`/product/uuid/${uuid}`)
- },
- baseURL: ()=>{
-    return process.env.VUE_APP_ROUTE_API 
  }
 }
 export default  provider;
