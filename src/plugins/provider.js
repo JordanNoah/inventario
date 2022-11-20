@@ -12,7 +12,9 @@ const provider = {
  saveBrandPut: async(uuid,formData) => {
    return await axios.put(`/brand/uuid/${uuid}`,formData)
  },
-
+ deleteBrand: async(uuid) => {
+   return await axios.delete(`/brand/uuid/${uuid}`)
+ },
 //
 
  getProductsAll: async() => {

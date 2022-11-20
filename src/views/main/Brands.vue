@@ -6,10 +6,10 @@
                     <v-card-title>
                         <v-row justify="space-between">
                             <v-col cols="5">
-                                <v-text-field outlined dense clearable hide-details></v-text-field>
+                                <v-text-field outlined dense clearable hide-details label="Search brands" v-model="search"></v-text-field>
                             </v-col>
                             <v-col cols="3" class="d-flex justify-end">
-                                <v-btn @click="dialog=true">
+                                <v-btn @click="dialog=true" depressed>
                                     <v-icon small class="pr-2">
                                         fas fa-plus
                                     </v-icon>
@@ -19,24 +19,10 @@
                         </v-row>
                     </v-card-title>
                     <v-data-table :headers="headers" :items="brands" class="elevation-0 mt-3" :search="search">
-                        <template v-slot:top>
-                            <v-dialog v-model="dialogDelete" max-width="500px">
-                                <v-card>
-                                    <v-card-title class="text-h5">Are you sure you want to delete this item?
-                                    </v-card-title>
-                                    <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                                        <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
-                                        <v-spacer></v-spacer>
-                                    </v-card-actions>
-                                </v-card>
-                            </v-dialog>
-                        </template>
                         <template v-slot:[`item.image`]="{ item }">
 
                             <v-avatar height="40" min-width="40" width="40">
-                                <v-img :src="`${$store.state.baseUrl}/${item.image}`"></v-img>
+                                <v-img :src="`${$store.state.baseUrl}/${item.image}`" contain></v-img>
                             </v-avatar>
                         </template>
                         <template v-slot:[`item.actions`]="{ item }">
@@ -57,7 +43,21 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-dialog v-model="dialog" width="500" class="rounded-xl" @click:outside="close()">
+        <v-dialog v-model="dialogDelete" max-width="290px" @keydown.esc="close()" @click:outside="close()">
+                                <v-card>
+                                    <v-card-title class="text-h6">Are you sure you want to delete this item {{editedItem.name}}?
+                                    </v-card-title>
+                                    <v-card-text>
+                                        <v-img :src="`${$store.state.baseUrl}/${editedItem.image.url}`"></v-img>
+                                    </v-card-text>
+                                    <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="blue darken-1" text @click="closeDelete()">Cancel</v-btn>
+                                        <v-btn color="blue darken-1" text @click="deleteItemConfirm()">OK</v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-dialog>
+        <v-dialog v-model="dialog" width="500" class="rounded-xl" @click:outside="close()" @keydown.esc="close()">
             <v-card elevation="0">
                 <v-container>
                     <v-row no-gutters>
@@ -124,7 +124,8 @@
                                         <div class="mx-2">
                                             <v-row>
                                                 <v-card-title>
-                                                    New Brand
+                                                    {{editedIndex}}
+                                                    {{editedIndex > -1 ? 'Edit Brand':'New Brand'}}
                                                 </v-card-title>
                                                 <v-col cols="12" class="d-flex align-center">
                                                     <v-text-field outlined dense hide-details="auto" label="Brand name"
@@ -208,7 +209,7 @@ export default {
             }
         ],
         brands: [],
-        dialog: true
+        dialog: false
     }),
     methods: {
         returnPreview() {
@@ -219,9 +220,22 @@ export default {
             }
         },
         closeDelete() {
-            this.dialogDelete = false
+            this.close()
         },
-        deleteItemConfirm() {},
+        deleteItem(item){
+            this.editedIndex = this.brands.indexOf(item)
+            this.editedItem.name = this.brands[this.editedIndex].name
+            this.editedItem.image.url = this.brands[this.editedIndex].image
+            this.editedItem.uuid = this.brands[this.editedIndex].uuid
+            this.dialogDelete = true
+        },
+        async deleteItemConfirm() {
+            var response = await this.$provider.deleteBrand(this.editedItem.uuid)
+            if (response.data.delete) {
+                this.brands.splice(this.editedIndex, 1)
+            }
+            this.close()
+        },
         openFileSystem() {
             this.$refs.fileSystem.$el.lastChild.firstChild.firstChild.lastChild.click()
         },
@@ -242,13 +256,17 @@ export default {
 
             if (!this.editedItem.uuid) {
                 let response = await this.$provider.saveBrandPost(formData)
-                console.error(response);
+                if (response.data.created) {
+                    this.brands.unshift(response.data.brand)
+                }
             } else {
                 let response = await this.$provider.saveBrandPut(this.editedItem.uuid, formData)
+                if (response.data.update) {
+                    console.log(response.data);
+                    this.brands.splice(this.editedIndex,1, response.data.brand)
+                }
                 console.log(response);
             }
-
-            //this.brands.push(response.data)
             this.close()
         },
         initialize() {
@@ -256,6 +274,7 @@ export default {
         },
         close() {
             this.dialog = false
+            this.dialogDelete = false
             this.uploadImage = null
             this.editedItem.name = null
             this.editedItem.image.url = null
