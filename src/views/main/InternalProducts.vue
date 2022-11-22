@@ -29,6 +29,7 @@
                         <v-row>
                           <v-col cols="12">
                             <v-form ref="form" v-model="valid">
+                              <v-autocomplete return-object dense outlined label="Brand" v-model="editedItem.brand"></v-autocomplete>
                               <v-text-field v-model="editedItem.name" label="Name" outlined dense hide-details="auto"
                                 :rules="name_rule"></v-text-field>
                             </v-form>
@@ -120,10 +121,12 @@
       desserts: [],
       editedIndex: -1,
       editedItem: {
+        brand:null,
         name: '',
         uuid: ''
       },
       defaultItem: {
+        brand:null,
         name: '',
         uuid: ''
       },
@@ -201,6 +204,7 @@
 
       async save() {
 
+        
         if (this.$refs.form.validate()) {
           if (this.editedIndex == -1) {
             var save = await this.$provider.saveProductsPost(this.editedItem)
