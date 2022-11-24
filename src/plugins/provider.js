@@ -15,6 +15,9 @@ const provider = {
  deleteBrand: async(uuid) => {
    return await axios.delete(`/brand/uuid/${uuid}`)
  },
+ getBrandByParam: async(param) => {
+   return await axios.get(`/brand/param/${param}`)
+ },
 //
 
  getProductsAll: async() => {

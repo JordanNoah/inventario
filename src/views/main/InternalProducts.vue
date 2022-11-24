@@ -29,7 +29,8 @@
                         <v-row>
                           <v-col cols="12">
                             <v-form ref="form" v-model="valid">
-                              <v-autocomplete return-object dense outlined label="Brand" v-model="editedItem.brand"></v-autocomplete>
+                              <v-autocomplete v-if="autocomplete" dense outlined :items="brandsEntries" label="Brand" v-model="autocompleteBrand" :search-input.sync="searchBrand" item-text="name" @keyup="brandmodel"></v-autocomplete>
+                              <v-text-field v-model="editedItem.brand"></v-text-field>
                               <v-text-field v-model="editedItem.name" label="Name" outlined dense hide-details="auto"
                                 :rules="name_rule"></v-text-field>
                             </v-form>
@@ -135,7 +136,12 @@
 
       ],
       valid: true,
-      search: ''
+      search: '',
+      //todo lo del auto complete
+      autocomplete:true,
+      searchBrand:null,
+      brandsEntries:[],
+      autocompleteBrand:null
     }),
 
     computed: {
@@ -151,6 +157,21 @@
       dialogDelete(val) {
         val || this.closeDelete()
       },
+      async searchBrand(val){
+
+        if(val.length == 0) return
+
+        var response = await this.$provider.getBrandByParam(val)
+        this.brandsEntries = response.data
+        if (response.data.length == 0) {
+          this.autocomplete = false
+        }else{
+          this.autocomplete = true
+        }
+      },
+      autocompleteBrand(val){
+        console.log(val);
+      }
     },
 
     async created() {
@@ -158,6 +179,10 @@
     },
 
     methods: {
+      brandmodel(){
+        this.editedItem.brand = this.searchBrand
+        console.log(this.searchBrand);
+      },
       async initialize() {
         var getall = await this.$provider.getProductsAll()
         console.log(getall);
@@ -180,7 +205,6 @@
         var del = await  this.$provider.deleteProducts(this.editedItem.uuid) 
         if (del.data.delete) {
           this.desserts.splice(this.editedIndex, 1)
-          console.log(del);
         }
 
         this.closeDelete()
@@ -204,21 +228,7 @@
 
       async save() {
 
-        
-        if (this.$refs.form.validate()) {
-          if (this.editedIndex == -1) {
-            var save = await this.$provider.saveProductsPost(this.editedItem)
-            this.desserts.push(save.data)
-            this.close()
-          } else {
-            var update = await this.$provider.saveProductsPut(this.editedItem.uuid,this.editedItem)
-            if (update.data.update) {
-              this.desserts.splice(this.editedIndex, 1, this.editedItem)
-            }
-            this.close()
-          }
-
-        }
+        console.log(this.editedItem);
 
       },
     },

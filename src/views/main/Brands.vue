@@ -124,7 +124,6 @@
                                         <div class="mx-2">
                                             <v-row>
                                                 <v-card-title>
-                                                    {{editedIndex}}
                                                     {{editedIndex > -1 ? 'Edit Brand':'New Brand'}}
                                                 </v-card-title>
                                                 <v-col cols="12" class="d-flex align-center">
